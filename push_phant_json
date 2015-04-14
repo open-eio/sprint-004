@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+"""  OPK push skeleton model code for Python.
+     Here are some test results:
+     $ echo "crap" | ./push -v -f junk.asc
+     $ cat junk.asc
+     PUSHING: crap
+     $ echo "crap" | ./push -v -f "junk/.asc"
+     ERROR: [Errno 2] No such file or directory: 'junk/.asc'
+"""
+import sys
+import argparse
+import json
+import urllib2
+from random import randint
+import time 
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-p","--publickey", required=True, help="phant public key")
+parser.add_argument("-q","--privatekey", required=True, help="phant private key")
+parser.add_argument("-v", "--verbose", action="store_true", help="increase output verbosity")
+
+args = parser.parse_args()
+
+
+# phant variables
+publicKey=args.publickey
+#'AJjpo34AYQc1d401qA41'
+privateKey=args.privatekey
+#'rzqrD4bYKMiznp0zqBpz'
+
+
+LOGFILE     = sys.stderr
+IN_STREAM   = sys.stdin
+OUT_STREAM  = sys.stdout
+
+try:
+    for line in IN_STREAM:
+
+        #assume json packet
+        a=json.loads(line)
+        temperature=float(a["temperature"])
+        conductivity=float(a["conductivity"])
+        depth=float(a["depth"])
+
+        print "temperature=",temperature
+
+        sentence = 'https://data.sparkfun.com/input/'+str(publicKey)+'?private_key='+str(privateKey)+'&temp='+str(temperature)+'&conductivity='+str(conductivity)+'&depth='+str(depth)
+
+        print sentence
+
+        url_response = urllib2.urlopen(sentence)
+
+        print url_response
+
+        #if args.verbose:
+        #    OUT_STREAM.write("PUSHING: ")
+        #OUT_STREAM.write(line)
+except Exception, exc:
+    LOGFILE.write("ERROR: %s" % exc)
+finally:
+    LOGFILE.close()
+    IN_STREAM.close()
