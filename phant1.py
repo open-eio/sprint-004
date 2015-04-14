@@ -9,6 +9,9 @@ import time
 #publicKey='xR0W4ZM6vpCO4waYNRzA'
 #privateKey='ZaevwqAKzrS2WmJoE89n'
 
+
+# note: can access the phant data associated with the below public and private keys here: https://data.sparkfun.com/streams/AJjpo34AYQc1d401qA41
+
 publicKey='AJjpo34AYQc1d401qA41'
 privateKey='rzqrD4bYKMiznp0zqBpz'
 
