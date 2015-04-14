@@ -54,8 +54,10 @@ void setup()
   sCmd.setDefaultHandler(command_unrecognized);           // Handler for command that isn't matched  (says "What?")
   //startup comm
   sCmd.addCommand("MEAS_PULSE_MICROS",  dummy_MEAS_PULSE_MICROS);     // Measure average pulse period
- sCmd.addCommand("MEAS_DEPTH_VALUES",  dummy_MEAS_DEPTH_VALUES);     // Measure average pulse period from pin D2
- 
+ //sCmd.addCommand("MEAS_DEPTH_VALUES",  dummy_MEAS_DEPTH_VALUES);     // Measure average pulse period from pin D2
+  sCmd.addCommand("MEAS_DEPTH_VALUES",  command_MEAS_DEPTH_VALUES);     // Measure average pulse period from pin D2
+
+
   sCmd.addCommand("MEAS_THERMISTOR", command_MEAS_THERMISTOR);
 
   //
@@ -180,6 +182,8 @@ void command_MEAS_PULSE_MICROS(SerialCommand this_scmd) {
 void command_MEAS_DEPTH_VALUES(SerialCommand this_scmd) {
   int period_depth; 
   int period_conductivity; 
+  float temperature;
+  
   int sampleDuration_millis = DEFAULT_SAMPLE_DURATION_MILLIS;
   char *arg = this_scmd.next();
   if (arg != NULL) {
@@ -188,7 +192,17 @@ void command_MEAS_DEPTH_VALUES(SerialCommand this_scmd) {
   
   period_depth = measureAveragePeriod(sampleDuration_millis, DEPTH_INTERRUPT);
   period_conductivity = measureAveragePeriod(sampleDuration_millis, CONDUCTIVITY_INTERRUPT);
+  temperature = measure_thermistor();
+  
   //send back result
+  this_scmd.print("{\"depth\":");
+  this_scmd.print(period_depth);
+  this_scmd.print(",\"conductivity\":");
+  this_scmd.print(period_conductivity);
+  this_scmd.print(",\"temperature\":");
+  this_scmd.print(temperature);
+  this_scmd.println("}");
+  
   this_scmd.println(period_depth);
 }
 
