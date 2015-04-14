@@ -31,8 +31,8 @@ int samples[NUMSAMPLES];
 
 //---------------- depth stuff
 
-#define DEPTH_INTERRUPT 0      // assumes depth pin is connected to pin D2 (interrupt pin "0")
-#define CONDUCTIVITY_INTERRUPT 1  // assumes conductivity pin is connected to pin D3 (interrupt pin "1")
+#define CONDUCTIVITY_INTERRUPT 0  // assumes conductivity pin is connected to pin D2 (interrupt pin "0")
+#define DEPTH_INTERRUPT 1     // assumes depth pin is connected to pin D3 (interrupt pin "1")
 
 int samplingPeriod=1; // the number of seconds to measure 555 oscillations
 
