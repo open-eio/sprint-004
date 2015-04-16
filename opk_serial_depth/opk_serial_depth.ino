@@ -203,7 +203,6 @@ void command_MEAS_DEPTH_VALUES(SerialCommand this_scmd) {
   this_scmd.print(temperature);
   this_scmd.println("}");
   
-  this_scmd.println(period_depth);
 }
 
 void dummy_MEAS_DEPTH_VALUES(SerialCommand this_scmd) {
