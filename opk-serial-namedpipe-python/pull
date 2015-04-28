@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+import time
+import argparse
+import serial
+
+USE_NAMED_PIPE = True
+DEFAULT_BAUDRATE = 9600
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-p", "--devpath",   required = True,     help="path to device")
+parser.add_argument("-n", "--namedpipe", default = None,      help="path to the persistent named pipe")
+parser.add_argument("-g", "--guess",     action="store_true", help="guess the pipe name from the DEVPATH")
+parser.add_argument("-v", "--verbose",   action="store_true", help="increase output verbosity")
+
+args = parser.parse_args()
+ser = None
+
+
+
+try:
+    pipename = 
+    # open serial port
+    ser = serial.Serial(args.path, baudrate=DEFAULT_BAUDRATE, dsrdtr=True)
+    time.sleep(4.0)
+    ser.flushInput()
+    # send command and retrieve response
+    ser.write("LED_STATUS\n")
+    time.sleep(0.1)
+    resp = ser.readline().strip()
+    sensor_val = int(resp)
+
+    if args.verbose:
+        print "LED status via path {}: {}".format(args.path, sensor_val)
+    else:
+        print sensor_val
+finally:
+    ser.close()

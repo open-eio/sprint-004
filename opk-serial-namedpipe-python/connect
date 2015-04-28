@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+import os, shutil, re, time, argparse, tempfile
+import serial
+
+DEFAULT_BAUDRATE = 9600
+PATH_SEP_REGEX = re.compile(r'[/]')
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-p","--devpath", required= True, help="path to serial device")
+parser.add_argument("-i","--input", default="infifo", help="name of input pipe")
+parser.add_argument("-o","--output", default="outfifo", help="name of output pipe")
+parser.add_argument("-v", "--verbose", action="store_true", help="increase output verbosity")
+args = parser.parse_args()
+
+#setup named pipes
+pipe_dir = [tempfile.gettempdir()]
+pipe_dir += ["opk-serial%s" % (PATH_SEP_REGEX.sub("-",args.devpath),)]
+pipe_dir = os.path.sep.join(pipe_dir)
+if os.path.isdir(pipe_dir):
+    shutil.rmtree(pipe_dir) #clobber existing pipe
+os.mkdir(pipe_dir)
+
+#note, opening a pipe will block until the other end is opened!
+in_pipename  = os.path.sep.join((pipe_dir, args.input))
+os.mkfifo(in_pipe_path)
+if args.verbose:
+    print "MADE INPUT FIFO AT PATH: {}".format(in_pipename)
+out_pipename = os.path.sep.join((pipe_dir, args.output))
+os.mkfifo(out_pipename)
+if args.verbose:
+    print "MADE OUTPUT FIFO AT PATH: {}".format(out_pipename)
+
+
+ser = None
+in_pipe = None
+out_pipe = None
+
+try:
+    # open serial port
+    ser = serial.Serial(args.devpath, baudrate=DEFAULT_BAUDRATE, dsrdtr=True)
+    while True:
+        if args.verbose:
+            print "OPENING IN PIPE, WAITING FOR CONNECTION..."
+        in_pipe  = open(in_pipename,'r')  #this blocks!
+        if args.verbose:
+            print "OPENING OUT PIPE, WAITING FOR CONNECTION..."
+        out_pipe = open(out_pipename,'w') #this also blocks!
+        if args.verbose:
+            print "HOOKUP COMPLETE."
+        # send command and retrieve response
+        for line in in_pipe:
+            if args.verbose:
+                print "SENDING SERIAL: {}".format(line.strip())
+            ser.write(line)
+        in_pipe.close()
+        for line in ser:
+            if args.verbose:
+                print "WRITING OUT PIPE: {}".format(line.strip())
+            out_pipe.write(line)
+        out_pipe.close()
+
+finally:
+    #cleanup
+    #ser.close()
+    shutil.rmtree(pipe_dir)
+    
